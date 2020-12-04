@@ -50,7 +50,7 @@ class PersonService:
         :param person_id: the person's id
         :return:
         """
-        if not self.person_exists(person_id):
+        if not self.person_exists(int(person_id)):
             raise PersonServiceException("The person that you are trying to remove does not exist.")
         person = self.__person_repository.find_by_id(person_id)
         self.__person_repository.delete_by_id(person_id)
@@ -60,15 +60,15 @@ class PersonService:
         li_activities = self.__activity_repository.find_all()
 
         for activity in li_activities:
-            if person_id in activity.person_id_list:
+            if int(person_id) in activity.person_id_list:
                 activity_copy = copy.deepcopy(activity)
                 li_affected_activities.append(activity_copy)
-                activity.person_id_list.remove(person_id)
+                activity.person_id_list.remove(int(person_id))
                 if len(activity.person_id_list) == 0:
                     li_activities_to_be_removed.append(activity_copy)
 
         li_info = [li_activities_to_be_removed, li_affected_activities, person]
-
+        # print(li_activities_to_be_removed)
         for activity in li_activities_to_be_removed:
             self.__activity_repository.delete_by_id(activity.id)
 

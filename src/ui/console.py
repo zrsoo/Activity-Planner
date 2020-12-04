@@ -34,13 +34,6 @@ class Console:
         self.__activity_service = activity_service
 
     def run_console(self):
-        try:
-            self.__person_service.generate_persons()
-            self.__activity_service.generate_activities()
-        except Exception as ex:
-            print("Error, " + str(ex))
-            traceback.print_exc()
-
         while True:
             try:
                 self.print_menu()
@@ -76,7 +69,7 @@ class Console:
                         self.print_busiest_days(list_days)
                 elif li_words[0] == "remove":
                     if li_words[1] == "person":
-                        li_info = self.__person_service.delete_person(int(li_words[2]))
+                        li_info = self.__person_service.delete_person(li_words[2])
                         CommandManager.register_undo_operation(self.__person_service, UndoHandler.DELETE_PERSON,
                                                           self.__activity_service, li_info)
                     elif li_words[1] == "activity":
@@ -130,7 +123,7 @@ class Console:
                     print("The command you have typed is of incorrect form.")
             except Exception as ex:
                 print("Error, " + str(ex))
-                # traceback.print_exc()
+                traceback.print_exc()
 
     def print_all_persons(self):
         print(green + "The list of persons is:\nFormat: *id*.) *name*; *phone number*" + default)
@@ -178,15 +171,6 @@ class Console:
               "16.) " + blue + "undo" + default + " - Undo the previous operation.\n"
               "17.) " + blue + "redo" + default + " - Redo the previously undone operation.\n"
               "18.) " + red + "exit" + default)
-
-    @staticmethod
-    def format_input(input_str):
-        """
-        Receives the string that was typed by the user in the console.
-        :return: A list containing each word separately
-        """
-        li_words = input_str.split()
-        return li_words
 
     @staticmethod
     def format_id_list(string):
@@ -275,3 +259,12 @@ class Console:
         print(green + "The list of days sorted by free time (in descending order) is as follows:" + default)
         for day in list_days:
             print("Date: " + day[0] + "; Busy time: " + str(day[1]) + " minutes")
+
+    @staticmethod
+    def format_input(input_str):
+        """
+        Receives the string that was typed by the user in the console.
+        :return: A list containing each word separately
+        """
+        li_words = input_str.split()
+        return li_words

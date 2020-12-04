@@ -1,5 +1,5 @@
 """
-    Repository module
+    In-memory Repository module
 """
 
 

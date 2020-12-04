@@ -4,6 +4,8 @@ Entities package
 
 # Imports
 import itertools
+
+
 #
 
 
@@ -14,6 +16,7 @@ class Person:
 
     # id - unique
     identification = itertools.count(1)
+
     #
 
     def __init__(self, name, phone_number):
@@ -53,6 +56,27 @@ class Person:
         return str(self.__id) + ".) " + self.name + "; " + self.phone_number
 
 
+# Reading from file
+
+def read_persons_from_file(data_file):
+    result = []
+    try:
+        file = open(data_file, "r")
+        line = file.readline().strip()
+
+        while len(line) > 0:
+            line = line.split(';')
+            result.append(Person(line[0], line[1]))
+            line = file.readline().strip()
+
+        file.close()
+    except Exception as ex:
+        print(ex)  # log the error
+        raise ex
+
+    return result
+
+
 class Activity:
     """
         The activity class
@@ -60,6 +84,7 @@ class Activity:
 
     # id - unique
     identification = itertools.count(1)
+
     #
 
     # List of person id's (contains the list of persons that perform the activity)
@@ -115,19 +140,38 @@ class Activity:
     # To str overload
 
     def __str__(self) -> str:
-        return str(self.__id) + ".) " + "Personal Id's: " + str(self.person_id_list) + "; "\
+        return str(self.__id) + ".) " + "Personal Id's: " + str(self.person_id_list) + "; " \
                + self.date + "; " + self.time + "; " + self.description
 
 
-# class Date:
-#     def __init__(self, date, num_activities):
-#         self.__date = date
-#         self.__num_activities = num_activities
-#
-#     @property
-#     def date(self):
-#         return self.__date
-#
-#     @property
-#     def num_activities(self):
-#         return self.num_activities
+# Reading activities from file
+
+def read_activities_from_file(data_file):
+    result = []
+    try:
+        file = open(data_file, "r")
+        line = file.readline().strip()
+
+        while len(line) > 0:
+            line = line.split(';')
+            result.append(Activity(format_id_list(line[0]), line[1], line[2], line[3]))
+            line = file.readline().strip()
+
+        file.close()
+    except Exception as ex:
+        print(ex)  # log the error
+        raise ex
+    return result
+
+
+def format_id_list(string):
+    """
+    Receives a string containing the list of id's of persons performing an activity
+    :return: A list containing the id's
+    """
+    string = string[1:-1]
+    li_ids = []
+    for word in string.split(","):
+        li_ids.append(int(word))
+    # print(li_ids)
+    return li_ids

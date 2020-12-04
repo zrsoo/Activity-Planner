@@ -44,36 +44,61 @@ Create an application to:
  without changes to source code.
 """
 
-
 # Start
 
 # Imports
 import traceback
+
+from domain.entity import read_persons_from_file, read_activities_from_file
 from domain.validators import PersonValidator, ActivityValidator
+from repository.filerepo import FileRepository
 from repository.inmemoryrepo import Repository
 from service.activity_service import ActivityService
 from service.person_service import PersonService
 from ui.console import Console
+import configparser
+
 #
 
 
 if __name__ == "__main__":
-
-    # test = Test()
-    # test.run_tests()
-
     try:
-        person_validator = PersonValidator()
-        person_repository = Repository()
+        config = configparser.ConfigParser()
+        config.read("settings.properties")
+        repo_mode = config.get("StorageSection", "repository")
+        persons_file = config.get("StorageSection", "persons")
+        activities_file = config.get("StorageSection", "activities")
 
-        activity_repository = Repository()
+        person_validator = PersonValidator()
         activity_validator = ActivityValidator()
+
+        person_repository = Repository()
+        activity_repository = Repository()
+
+        # elif repo_mode == "textfiles":
+        #     person_repository = FileRepository()
+        #     activity_repository = FileRepository()
+        #
+        #     for person in read_persons_from_file(persons_file):
+        #         print(person)
+        #         person_repository.save(person)
+        #
+        #     for activity in read_activities_from_file(activities_file):
+        #         print(activity)
+        #         activity_repository.save(activity)
+        # elif repo_mode == "binaryfiles":
+        #     pass  # TODO this
 
         person_service = PersonService(person_validator, person_repository, activity_repository)
         activity_service = ActivityService(activity_validator, activity_repository, person_service)
 
+        if repo_mode == "inmemory":
+            person_service.generate_persons()
+            activity_service.generate_activities()
+
         console = Console(person_service, activity_service)
         console.run_console()
+
     except Exception as ex:
         print("Error, " + str(ex))
-        # traceback.print_exc()
+        traceback.print_exc()
