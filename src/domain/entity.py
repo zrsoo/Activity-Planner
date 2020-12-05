@@ -4,7 +4,7 @@ Entities package
 
 # Imports
 import itertools
-
+import pickle
 
 #
 
@@ -56,7 +56,7 @@ class Person:
         return str(self.__id) + ".) " + self.name + "; " + self.phone_number
 
 
-# Reading from file
+# Reading from text file
 
 def read_persons_from_file(data_file):
     result = []
@@ -175,3 +175,17 @@ def format_id_list(string):
         li_ids.append(int(word))
     # print(li_ids)
     return li_ids
+
+
+# Reading from binary file
+
+
+def read_binary_file(data_file):
+    try:
+        f = open(data_file, "rb")
+        return pickle.load(f)
+    except EOFError:  # If input file is empty
+        return []
+    except IOError as e:
+        print(e)
+        raise e

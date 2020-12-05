@@ -49,8 +49,9 @@ Create an application to:
 # Imports
 import traceback
 
-from domain.entity import read_persons_from_file, read_activities_from_file
+from domain.entity import read_persons_from_file, read_activities_from_file, read_binary_file, Person, Activity
 from domain.validators import PersonValidator, ActivityValidator
+from repository.binaryrepo import BinaryFilesRepository
 from repository.filerepo import FileRepository
 from repository.inmemoryrepo import Repository
 from service.activity_service import ActivityService
@@ -66,18 +67,20 @@ if __name__ == "__main__":
         config = configparser.ConfigParser()
         config.read("settings.properties")
         repo_mode = config.get("StorageSection", "repository")
-        persons_file = config.get("StorageSection", "persons")
-        activities_file = config.get("StorageSection", "activities")
 
         person_validator = PersonValidator()
         activity_validator = ActivityValidator()
 
         person_repository = None
         activity_repository = None
+
         if repo_mode == "inmemory":
             person_repository = Repository()
             activity_repository = Repository()
-        elif repo_mode == "textfiles":  # Saving entities from files in our repo
+        elif repo_mode == "textfiles":  # Saving entities from files in file repo
+            persons_file = config.get("StorageSection", "persons")
+            activities_file = config.get("StorageSection", "activities")
+
             person_repository = FileRepository(persons_file)
             activity_repository = FileRepository(activities_file)
 
@@ -89,7 +92,30 @@ if __name__ == "__main__":
                 # print(activity)
                 activity_repository.save(activity)
         elif repo_mode == "binaryfiles":
-            pass  # TODO this
+            persons_file = config.get("StorageSection", "persons_binary")
+            activities_file = config.get("StorageSection", "activities_binary")
+
+            person_repository = BinaryFilesRepository(persons_file)
+            activity_repository = BinaryFilesRepository(activities_file)
+
+            for person in read_binary_file(persons_file):
+                # print(person)
+                person_repository.save(person)
+
+            for activity in read_binary_file(activities_file):
+                # print(activity)
+                activity_repository.save(activity)
+
+            id_person = person_repository.get_greatest_id()
+            id_activity = activity_repository.get_greatest_id()
+
+            while id_person > 0:
+                p = Person('a', '1')
+                id_person -= 1
+
+            while id_activity > 0:
+                a = Activity([1], '1/1/1', '1:1-1:2', 'a')
+                id_activity -= 1
 
         person_service = PersonService(person_validator, person_repository, activity_repository)
         activity_service = ActivityService(activity_validator, activity_repository, person_service)
@@ -101,7 +127,7 @@ if __name__ == "__main__":
         console = Console(person_service, activity_service)
         console.run_console()
 
-        if repo_mode == "textfiles":  # Writing our entities into the files
+        if repo_mode == "textfiles" or repo_mode == "binaryfiles":  # Writing our entities into the files
             person_repository.write_all_to_file()
             activity_repository.write_all_to_file()
 
